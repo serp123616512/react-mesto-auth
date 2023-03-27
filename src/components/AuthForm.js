@@ -1,4 +1,4 @@
-import React  from "react";
+import React, { useState } from "react";
 
 function AuthForm({
   name,
@@ -6,18 +6,32 @@ function AuthForm({
   subtitle,
   link,
   onSubmit,
-  email,
-  handleChangeEmail,
-  password,
-  handleChangePassword,
   submitButtonText
   }) {
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  function handleChangeEmail(e) {
+    setEmail(e.target.value);
+  }
+
+  function handleChangePassword(e) {
+    setPassword(e.target.value);
+  }
+
+  function handleSubmit(e) {
+    e.preventDefault();
+
+    onSubmit({});
+  }
+
   return (
     <section id={name} className="auth">
       <form
         name={`${name}-form`}
         className="auth__content"
-        onSubmit={onSubmit}
+        onSubmit={handleSubmit}
       >
         <h1 className="auth__title">{title}</h1>
         <input

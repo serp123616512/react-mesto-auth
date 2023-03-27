@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 
 import { CurrentUserContext } from "../contexts/CurrentUserContext.js";
 
+import Register from "./Register.js";
+import Login from "./Login.js";
+
 import Header from "./Header.js";
 import Main from "./Main.js";
 import Footer from "./Footer.js";
@@ -125,6 +128,9 @@ function App() {
   return (
     <CurrentUserContext.Provider value={currentUser}>
       <Header />
+      <Register />
+      <Login />
+      {/*
       <Main
         onEditAvatar={handleAvatarClick}
         onEditProfile={handleProfileClick}
@@ -134,7 +140,7 @@ function App() {
         onTrashClick={handleTrashClick}
         onCardLike={handleCardLike}
         onCardDislike={handleCardDislike}
-      />
+      /> */}
       <Footer />
       {/*  Popups  */}
       <ImagePopup
