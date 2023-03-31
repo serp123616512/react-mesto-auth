@@ -9,7 +9,8 @@ function Login ({onLogin}) {
       name="login"
       title="Вход"
       subtitle="Еще не зарегистрированы?"
-      link="Зарегистрироваться"
+      link="/sign-up"
+      linkText="Зарегистрироваться"
       onSubmit={onLogin}
       submitButtonText="Войти"
     />

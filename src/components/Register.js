@@ -9,7 +9,8 @@ function Register ({onRegister}) {
       name="register"
       title="Регистрация"
       subtitle="Уже зарегистрированы?"
-      link="Войти"
+      link="/sign-in"
+      linkText="Войти"
       onSubmit={onRegister}
       submitButtonText="Зарегистрироваться"
     />

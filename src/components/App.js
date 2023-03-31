@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from "react";
+import { Routes, Route, useNavigate} from "react-router-dom";
+
+import ProtectedRoute from "./ProtectedRoute.js";
 
 import { CurrentUserContext } from "../contexts/CurrentUserContext.js";
 
@@ -14,18 +17,28 @@ import EditAvatarPopup from "./EditAvatarPopup.js";
 import EditProfilePopup from "./EditProfilePopup.js";
 import AddPlacePopup from "./AddPlacePopup.js";
 import AcceptDeleteCardPopup from "./AcceptDeleteCardPopup.js";
+import InfoTooltip from "./InfoTooltip.js";
 
 import api from "../utils/api.js";
+import auth from "../utils/auth.js";
 
 function App() {
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [email, setEmail] = useState('email@yandex.ru');
+
+  const navigate = useNavigate();
+
   const [currentUser, setCurrentUser] = useState({});
   const [cards, setCards] = useState([]);
 
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
-  const [isAcceptDeleteCardPopupOpen, setAcceptDeleteCardPopupOpen] = useState(false);
+  const [isAcceptDeleteCardPopupOpen, setIsAcceptDeleteCardPopupOpen] = useState(false);
   const [cardId, setCardId] = useState('');
+
+  const [isAcceptRegisterPopupOpen, setIsAcceptRegisterPopupOpen] = useState(false);
+  const [isDeclineRegisterPopupOpen, setIsDeclineRegisterPopupOpen] = useState(false);
 
   const [selectedCard, setSelectedCard] = useState({});
 
@@ -46,7 +59,7 @@ function App() {
   }
 
   function handleTrashClick(cardId) {
-    setAcceptDeleteCardPopupOpen(true);
+    setIsAcceptDeleteCardPopupOpen(true);
     setCardId(cardId);
   }
 
@@ -113,7 +126,9 @@ function App() {
     setIsEditProfilePopupOpen(false);
     setIsAddPlacePopupOpen(false);
     setSelectedCard({});
-    setAcceptDeleteCardPopupOpen('');
+    setIsAcceptDeleteCardPopupOpen('');
+    setIsAcceptRegisterPopupOpen(false);
+    setIsDeclineRegisterPopupOpen(false);
   }
 
   useEffect(() => {
@@ -125,22 +140,71 @@ function App() {
     .catch(console.log);
   }, []);
 
+  function handleLoginClick({email, password}) {
+    auth
+    .signIn({email, password})
+    .then(res => {
+      localStorage.setItem('token', res.token);
+      setLoggedIn(true);
+      navigate('/', {replace: true})
+    })
+    .catch(console.log);
+  }
+
+  function handleRegisterClick({email, password}) {
+    auth
+    .signUp({email, password})
+    .then(res => setIsAcceptRegisterPopupOpen(true))
+    .catch(err => setIsDeclineRegisterPopupOpen(true));
+  }
+
+  function handleLogoutClick() {
+    localStorage.removeItem('token');
+    setLoggedIn(false);
+  }
+
+  useEffect(() => {
+    if (localStorage.getItem('token')) {
+      const token = localStorage.getItem('token');
+
+      auth
+      .checkToken({token})
+      .then(res => {
+        setEmail(res.data.email);
+        setLoggedIn(true);
+        navigate('/', {replace: true})
+      })
+      .catch(console.log);
+    }
+  }, [])
+
   return (
     <CurrentUserContext.Provider value={currentUser}>
-      <Header />
-      <Register />
-      <Login />
-      {/*
-      <Main
-        onEditAvatar={handleAvatarClick}
-        onEditProfile={handleProfileClick}
-        onAddPlace={handleAddCardClick}
-        cards={cards}
-        onCardClick={handleCardClick}
-        onTrashClick={handleTrashClick}
-        onCardLike={handleCardLike}
-        onCardDislike={handleCardDislike}
-      /> */}
+      <Header
+        email={email}
+        signOut={handleLogoutClick}
+        LoginText="Войти"
+        LogoutText="Выйти"
+        RegisterText="Зарегистрироваться"
+      />
+      <Routes>
+        <Route path="/" element={
+          <ProtectedRoute
+            component={Main}
+            loggedIn={loggedIn}
+            onEditAvatar={handleAvatarClick}
+            onEditProfile={handleProfileClick}
+            onAddPlace={handleAddCardClick}
+            cards={cards}
+            onCardClick={handleCardClick}
+            onTrashClick={handleTrashClick}
+            onCardLike={handleCardLike}
+            onCardDislike={handleCardDislike}
+          />
+        } />
+        <Route path="/sign-up" element={<Register onRegister={handleRegisterClick} />} />
+        <Route path="/sign-in" element={<Login onLogin={handleLoginClick} />} />
+      </Routes>
       <Footer />
       {/*  Popups  */}
       <ImagePopup
@@ -167,6 +231,21 @@ function App() {
         isOpen={isAcceptDeleteCardPopupOpen}
         onClose={closeAllPopups}
         onAcceptDeleteCard={handleAcceptDeleteCard}
+      />
+      <InfoTooltip
+        isOpen={isAcceptRegisterPopupOpen}
+        onClose={() => {
+          closeAllPopups();
+          navigate('/', {replace: true});
+        }}
+        isAccept={true}
+        infoText="Вы успешно зарегистрировались!"
+      />
+      <InfoTooltip
+        isOpen={isDeclineRegisterPopupOpen}
+        onClose={closeAllPopups}
+        isAccept={false}
+        infoText="Что-то пошло не так! Попробуйте ещё раз."
       />
     </CurrentUserContext.Provider>
   );

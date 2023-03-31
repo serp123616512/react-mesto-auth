@@ -1,10 +1,12 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 
 function AuthForm({
   name,
   title,
   subtitle,
   link,
+  linkText,
   onSubmit,
   submitButtonText
   }) {
@@ -23,7 +25,7 @@ function AuthForm({
   function handleSubmit(e) {
     e.preventDefault();
 
-    onSubmit({});
+    onSubmit({email, password});
   }
 
   return (
@@ -59,7 +61,7 @@ function AuthForm({
         <button className="auth__accept button-hover" type="submit">{submitButtonText}</button>
         <h2 className="auth__subtitle">
           {subtitle}
-          <a className="auth__link button-hover" href="#">{link}</a>
+          <Link className="auth__link button-hover" to={link} >{linkText}</Link>
         </h2>
       </form>
     </section>
