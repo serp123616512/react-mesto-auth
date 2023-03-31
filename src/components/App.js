@@ -24,7 +24,7 @@ import auth from "../utils/auth.js";
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
-  const [email, setEmail] = useState('email@yandex.ru');
+  const [email, setEmail] = useState('');
 
   const navigate = useNavigate();
 
@@ -131,20 +131,22 @@ function App() {
     setIsDeclineRegisterPopupOpen(false);
   }
 
-  useEffect(() => {
+  useEffect(() => { if (loggedIn) {
     Promise.all([api.getUserData(), api.getCardData()])
     .then(([userData, cardData]) => {
       setCurrentUser(userData);
       setCards(cardData);
     })
-    .catch(console.log);
-  }, []);
+    .catch(console.log);}
+  }, [loggedIn]);
 
   function handleLoginClick({email, password}) {
     auth
     .signIn({email, password})
     .then(res => {
+      console.log(res);
       localStorage.setItem('token', res.token);
+      setEmail(email);
       setLoggedIn(true);
       navigate('/', {replace: true})
     })
